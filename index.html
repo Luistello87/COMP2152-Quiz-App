@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COMP2152 Quiz</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel for JSX compilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {}
+        }
+      }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+const { useState } = React;
+
+const questions = [
+  // Control Flow
+  { id:1, topic:"Control Flow", q:"In an if/elif/else chain, what keyword checks a second condition?", opts:["else","elif","elseif","then"], ans:1, hint:"It's a shortening of 'else if'." },
+  { id:2, topic:"Control Flow", q:"If condition1 is True in an if/elif/else block, what happens to condition2?", opts:["It is also evaluated","It is skipped","It causes an error","It becomes False"], ans:1, hint:"Only one branch executes in an if/elif/else chain." },
+  { id:3, topic:"Control Flow", q:"What block runs if NONE of the conditions in an if/elif chain are True?", opts:["elif","default","else","finally"], ans:2, hint:"It's the catch-all at the end of the chain." },
+  { id:4, topic:"Control Flow", q:"Can you have multiple elif blocks in a single if/elif/else structure?", opts:["No, only one elif allowed","Yes, multiple are allowed","Only in Python 3","Only if there's no else"], ans:1, hint:"The execution order diagram shows conditions 1, 2, and 3." },
+  // Python Lists
+  { id:5, topic:"Python Lists", q:"Python lists are equivalent to what structure in other languages?", opts:["Stacks","Queues","Arrays","Linked lists"], ans:2, hint:"Most common sequential data structure across languages." },
+  { id:6, topic:"Python Lists", q:"What brackets are used to define a Python list?", opts:["( )","{ }","[ ]","< >"], ans:2, hint:"They are 'square' brackets." },
+  { id:7, topic:"Python Lists", q:"Given someList = ['sad','happy','angry','excited'], what does someList[-4] return?", opts:["'excited'","'angry'","'happy'","'sad'"], ans:3, hint:"Negative indexing starts from the end. -1 is last, -4 is first." },
+  { id:8, topic:"Python Lists", q:"In Python negative indexing, does -0 exist?", opts:["Yes, same as 0","No, there is no -0","Yes, it's the last element","Only in Python 2"], ans:1, hint:"'In the negative direction, there is no 0.'" },
+  { id:9, topic:"Python Lists", q:"Given someList = ['sad','happy','angry','excited'], which two expressions access 'sad'?", opts:["someList[1] and someList[-3]","someList[0] and someList[-4]","someList[0] and someList[-1]","someList[1] and someList[-4]"], ans:1, hint:"Index 0 is always first. What's its negative equivalent for a 4-element list?" },
+  // Slicing
+  { id:10, topic:"Python Slicing", q:"In Python slicing [start:end], is the start index inclusive or exclusive?", opts:["Exclusive","Inclusive","Depends on type","Neither"], ans:1, hint:"The start position IS included in the result." },
+  { id:11, topic:"Python Slicing", q:"In Python slicing [start:end], is the end index inclusive or exclusive?", opts:["Inclusive","Exclusive","Depends on data","Always 0"], ans:1, hint:"The end index is NOT included in the result." },
+  { id:12, topic:"Python Slicing", q:"Given someList = ['sad','happy','angry','excited'], what does someList[0:2] return?", opts:["['sad','happy','angry']","['happy','angry']","['sad','happy']","['sad']"], ans:2, hint:"Start at 0 (inclusive), stop at 2 (exclusive)." },
+  // Tuples
+  { id:13, topic:"Python Tuples", q:"What brackets are used to define a Python tuple?", opts:["[ ]","{ }","( )","< >"], ans:2, hint:"They are round/parenthesis brackets." },
+  { id:14, topic:"Python Tuples", q:"Compared to lists, are tuples faster or slower for processing?", opts:["Slower","Same speed","Faster","Depends on size"], ans:2, hint:"Their immutability gives them a performance advantage." },
+  { id:15, topic:"Python Tuples", q:"Can you add or remove items from a tuple after it has been created?", opts:["Yes, using append()","Yes, using add()","No, tuples are immutable","Only if it has one element"], ans:2, hint:"Tuples 'have order and enforce (cannot change) order'." },
+  { id:16, topic:"Python Tuples", q:"Can a Python tuple contain a mixture of data types?", opts:["No, all elements must be same type","Yes, but the order of data types is fixed","Yes, and order doesn't matter","Only numbers and strings"], ans:1, hint:"Yes they can, but the order of those data types is fixed." },
+  // Sets
+  { id:17, topic:"Python Sets", q:"What brackets are used to define a Python set?", opts:["[ ]","( )","< >","{ }"], ans:3, hint:"Curly brackets — same as dictionaries but no key-value pairs." },
+  { id:18, topic:"Python Sets", q:"Can a Python set contain duplicate values?", opts:["Yes","No, all values must be unique","Only numbers can duplicate","Only if the set is frozen"], ans:1, hint:"'All must be unique values' in a set." },
+  { id:19, topic:"Python Sets", q:"Are Python sets mutable (changeable) or immutable?", opts:["Immutable","Mutable/Changeable","Read-only","Depends on Python version"], ans:1, hint:"Unlike tuples, sets can be changed after creation." },
+  { id:20, topic:"Python Sets", q:"Which set operation returns elements common to BOTH sets?", opts:["Union","Subset","Intersection","Symmetric difference"], ans:2, hint:"Think Venn diagram — the overlapping middle section." },
+  { id:21, topic:"Python Sets", q:"Which set operation returns ALL elements from both sets combined?", opts:["Intersection","Union","Subset","Difference"], ans:1, hint:"This operation combines everything from both sets." },
+  { id:22, topic:"Python Sets", q:"What does the 'Symmetric Difference' set operation return?", opts:["Elements in both sets","Elements in neither set","Elements that are different between the sets","The larger set"], ans:2, hint:"What is different between the sets — elements NOT shared." },
+  // Dictionaries
+  { id:23, topic:"Dictionaries", q:"What is a Python dictionary primarily used for?", opts:["Sorting data","Lookup","Iteration only","Math operations"], ans:1, hint:"Like a real dictionary — you look up a key to find a value." },
+  { id:24, topic:"Dictionaries", q:"In a Python dictionary, are keys mutable or immutable?", opts:["Mutable","Immutable","Either, depending on value","Always strings"], ans:1, hint:"Keys cannot be changed after they are set." },
+  { id:25, topic:"Dictionaries", q:"Which dictionary method returns both keys AND values (used for looping)?", opts:["dict.keys()","dict.values()","dict.all()","dict.items()"], ans:3, hint:"Think 'items' as key-value pairs." },
+  { id:26, topic:"Dictionaries", q:"Which dictionary method returns ONLY the keys?", opts:["dict.items()","dict.keys()","dict.values()","dict.get()"], ans:1, hint:"The method name matches exactly what it returns." },
+  { id:27, topic:"Dictionaries", q:"Which dictionary method returns ONLY the values?", opts:["dict.items()","dict.keys()","dict.get()","dict.values()"], ans:3, hint:"The method name matches exactly what it returns." },
+  // Git
+  { id:28, topic:"Git", q:"Which Git command stages your changes for the next commit?", opts:["git commit","git push","git add","git stage"], ans:2, hint:"First step in the Git workflow after making changes." },
+  { id:29, topic:"Git", q:"Which Git command saves staged changes to the LOCAL repository?", opts:["git push","git save","git add","git commit"], ans:3, hint:"This records a snapshot of your staged changes locally." },
+  { id:30, topic:"Git", q:"Which Git command uploads your commits to the REMOTE repository?", opts:["git upload","git push","git send","git commit"], ans:1, hint:"You 'push' your changes out to the remote." },
+  { id:31, topic:"Git", q:"Which Git command creates a new branch?", opts:["git checkout","git fork","git branch","git new"], ans:2, hint:"The command name matches what it creates." },
+  { id:32, topic:"Git", q:"Which Git command switches between branches?", opts:["git switch","git branch","git checkout","git move"], ans:2, hint:"You 'check out' a branch to start working on it." },
+  { id:33, topic:"Git", q:"Which Git command downloads a remote repository to your local machine?", opts:["git pull","git fetch","git fork","git clone"], ans:3, hint:"It makes a full copy — like cloning a living thing." },
+  { id:34, topic:"Git", q:"When collaborating, what should you do BEFORE pushing to avoid errors?", opts:["Delete the remote branch","Fetch/pull the latest code","Create a new repository","Merge into main immediately"], ans:1, hint:"You need the most up-to-date code before sending your own changes." },
+  { id:35, topic:"Git", q:"What does 'git forking' create?", opts:["A new commit","A personal copy of someone else's repo","A new local branch","A merge conflict"], ans:1, hint:"Forking gives you your own copy of a public repo to work with." },
+  { id:36, topic:"Git", q:"Which command downloads remote changes but does NOT merge them automatically?", opts:["git pull","git clone","git fetch","git checkout"], ans:2, hint:"The other option (git pull) fetches AND merges automatically." },
+  // Debugging
+  { id:37, topic:"Debugging", q:"What is a breakpoint used for in debugging?", opts:["Deleting a line of code","Pausing program execution at a specific line","Skipping a function entirely","Compiling the program"], ans:1, hint:"The program 'breaks' (pauses) so you can inspect variables at that moment." },
+  { id:38, topic:"Debugging", q:"What does 'Step Over' do in the debugger?", opts:["Goes deeper into a function","Moves out of current block","Executes current line and moves to next at same level","Restarts the program"], ans:2, hint:"It 'steps over' the current line — stays at the same depth." },
+  { id:39, topic:"Debugging", q:"What does 'Step Into' do in the debugger?", opts:["Executes line and moves to next","Exits current function","Enters and executes deeper into a function call","Skips current block"], ans:2, hint:"It 'steps into' a function to inspect what happens inside." },
+  { id:40, topic:"Debugging", q:"What does 'Step Out' do in the debugger?", opts:["Exits the program entirely","Moves one block level out and continues from there","Enters a nested function","Goes back to the previous line"], ans:1, hint:"You're stepping 'out' of the current function/block to the caller." },
+  // OOP
+  { id:41, topic:"OOP", q:"What is polymorphism in Python OOP?", opts:["Ability to inherit from multiple classes","Capability for a single object to behave in multiple ways","Process of hiding internal data","Ability to combine two objects"], ans:1, hint:"'Poly' = many, 'morph' = form — one object, many forms." },
+  { id:42, topic:"OOP", q:"What is the Python constructor method called?", opts:["__construct()","__create()","__start()","__init__()"], ans:3, hint:"Short for 'initialize' with double underscores on each side." },
+  { id:43, topic:"OOP", q:"What decorator is used to define a getter (magic getter) in Python?", opts:["@getter","@staticmethod","@property","@classmethod"], ans:2, hint:"It makes a method accessible as if it were a property." },
+  { id:44, topic:"OOP", q:"What decorator is used to define a setter in Python?", opts:["@setter","@set.property","@propertyName.setter","@property.set"], ans:2, hint:"It uses the property name followed by '.setter'." },
+  { id:45, topic:"OOP", q:"In inheritance, a subclass is also called a:", opts:["Base class / Parent class","Root class / Origin class","Child class / Derived class","Master class / Super class"], ans:2, hint:"Sub = below. It 'derives' from its parent." },
+  { id:46, topic:"OOP", q:"In inheritance, a superclass is also called a:", opts:["Child class / Derived class","Sub class / Minor class","Parent class / Base class","Extended class / Root class"], ans:2, hint:"Super = above. It's the class being inherited FROM." },
+  { id:47, topic:"OOP", q:"Magic getters and setters are defined with '@', but how are they ACCESSED?", opts:["Using a method call with parentheses ()","Using a special get() method","As public properties — no parentheses","Only within the class itself"], ans:2, hint:"Access them like obj.propertyName, NOT obj.propertyName()." },
+  { id:48, topic:"OOP", q:"What does encapsulation refer to in OOP?", opts:["Combining multiple classes","Hiding internal data and implementation details","Making a class inherit from another","Overriding parent methods"], ans:1, hint:"Like a capsule — it wraps/hides internal details from outside." },
+  { id:49, topic:"OOP", q:"In polymorphism, 'overriding a method' means:", opts:["Deleting a method from the parent","A child class provides its own version of a parent method","Calling a method multiple times","Adding extra parameters"], ans:1, hint:"The child class 'overrides' (replaces) the parent's version." },
+  // Recursion & Algorithms
+  { id:50, topic:"Recursion & Algorithms", q:"What is the key characteristic that makes a function recursive in Python?", opts:["It uses a loop internally","It calls itself within its own body","It takes no parameters","It always returns None"], ans:1, hint:"A recursive function solves a problem by calling itself with a simpler version of the problem." },
+  { id:51, topic:"Recursion & Algorithms", q:"When using recursion to add a range of numbers (e.g., 1 to n), what is the base case typically?", opts:["When n equals 100","When n is even","When n equals 0 or 1","When the list is empty and n > 1"], ans:2, hint:"The base case stops the recursion — adding nothing means the sum is 0 or 1." },
+  { id:52, topic:"Recursion & Algorithms", q:"In Python, what must EVERY recursive function have to prevent infinite recursion?", opts:["A global variable","A return statement in the first line","A base case that stops the recursion","A loop inside the function"], ans:2, hint:"Without a stopping condition, the function calls itself forever causing a stack overflow." },
+  // Functions & Modules
+  { id:53, topic:"Functions & Modules", q:"Which keyword is used to define a function in Python?", opts:["function","define","fun","def"], ans:3, hint:"Python uses a short 3-letter keyword followed by the function name." },
+  { id:54, topic:"Functions & Modules", q:"How do you import a specific function called 'calc' from a module called 'math_utils'?", opts:["import calc from math_utils","from math_utils import calc","include math_utils.calc","require('math_utils').calc"], ans:1, hint:"Python uses 'from <module> import <name>' syntax for selective imports." },
+  { id:55, topic:"Functions & Modules", q:"What file extension does a Python module file use?", opts:[".mod",".pkg",".lib",".py"], ans:3, hint:"All Python source files share the same extension." },
+  // File I/O
+  { id:56, topic:"File I/O", q:"Which built-in Python function is used to open a file for reading or writing?", opts:["read()","file()","open()","load()"], ans:2, hint:"It's the standard gateway to file operations in Python." },
+  { id:57, topic:"File I/O", q:"When opening a text file in Python, which mode string is used to open it for READING?", opts:["'w'","'a'","'x'","'r'"], ans:3, hint:"Think of the first letter of 'read'." },
+  { id:58, topic:"File I/O", q:"Which Python module provides classes to read and write CSV files?", opts:["json","csv","pandas","file"], ans:1, hint:"The module is named directly after the file format it handles." },
+  // System Applications
+  { id:59, topic:"System Applications", q:"Which Python module provides access to command-line arguments via sys.argv?", opts:["os","platform","subprocess","sys"], ans:3, hint:"It's short for 'system' — gives access to the Python interpreter's internals." },
+  { id:60, topic:"System Applications", q:"Which Python module lets you interact with the operating system (e.g., list directories, get env variables)?", opts:["sys","os","platform","socket"], ans:1, hint:"Named after the thing it interacts with — the Operating System." },
+  { id:61, topic:"System Applications", q:"In Python exception handling, which keyword catches an error that occurs in a try block?", opts:["catch","error","except","handle"], ans:2, hint:"Python doesn't use 'catch' — it uses a different keyword that sounds similar." },
+  // Databases
+  { id:62, topic:"Databases", q:"Which Python module is used to connect to a SQLite database?", opts:["pymysql","psycopg2","sqlite3","dbconnect"], ans:2, hint:"It's part of the Python standard library and named after the database it supports." },
+  { id:63, topic:"Databases", q:"After executing a SELECT statement with a cursor, which method retrieves ALL resulting rows?", opts:["cursor.get()","cursor.results()","cursor.select()","cursor.fetchall()"], ans:3, hint:"The method name combines 'fetch' (retrieve) and 'all' (every row)." },
+  { id:64, topic:"Databases", q:"When executing INSERT, UPDATE, or DELETE statements in Python's sqlite3 module, what must you call to save the changes permanently?", opts:["cursor.execute('COMMIT')","connection.commit()","cursor.save()","connection.save()"], ans:1, hint:"Changes are not saved until you 'commit' the transaction on the connection object." },
+  // Classes & Objects
+  { id:65, topic:"Classes & Objects", q:"Which keyword is used to define a class in Python?", opts:["object","struct","type","class"], ans:3, hint:"Python uses the same English word as the concept itself." },
+  { id:66, topic:"Classes & Objects", q:"What is an 'object' in the context of Python OOP?", opts:["A module imported into your script","A file stored on disk","A variable that holds a number","An instance of a class created at runtime"], ans:3, hint:"You create (instantiate) an object FROM a class blueprint." },
+  { id:67, topic:"Classes & Objects", q:"What is object composition in Python OOP?", opts:["A class inheriting from multiple parents","Building a class by including instances of other classes as attributes","Converting an object to a string","Overriding a parent class method"], ans:1, hint:"Composition means a class 'has' another object as a part — a 'has-a' relationship." },
+  // Licenses
+  { id:68, topic:"Open Source Licenses", q:"Which open source license explicitly disclaims 'WARRANTIES OF MERCHANTABILITY'?", opts:["MIT License","GNU GPL v2","Fair License","BSD License"], ans:3, hint:"It's a one-clause license with a liability disclaimer." },
+  { id:69, topic:"Open Source Licenses", q:"Which license is 'free of charge' and grants rights to use, copy, modify, merge, publish, distribute, sublicense, and sell?", opts:["GNU GPL v2","Fair License","MIT License","BSD License"], ans:2, hint:"One of the most permissive and widely used licenses." },
+  { id:70, topic:"Open Source Licenses", q:"The GNU GPL v2 allows copying verbatim copies of the license document, but what is NOT allowed?", opts:["Selling copies","Modifying/changing it","Distributing it","Reading it"], ans:1, hint:"You can share it exactly as-is, but you can't alter the license text." },
+  { id:71, topic:"Open Source Licenses", q:"What is the key requirement of the Fair License?", opts:["Software must be free","Any entity that uses the work must be notified of the license","Source code must be open","Changes must use the same license"], ans:1, hint:"'Any entity that uses the works is notified of this instrument.'" },
+  { id:72, topic:"Open Source Licenses", q:"Where can you find a comprehensive list of open source licenses (as shown in the lecture)?", opts:["github.com/licenses","opensource.org/licenses","gnu.org/licenses","mit.edu/licenses"], ans:1, hint:"The URL was shown directly in the lecture notes." },
+];
+
+const TOPIC_COLORS = {
+  "Control Flow": "bg-purple-100 text-purple-800",
+  "Python Lists": "bg-blue-100 text-blue-800",
+  "Python Slicing": "bg-blue-100 text-blue-800",
+  "Python Tuples": "bg-cyan-100 text-cyan-800",
+  "Python Sets": "bg-teal-100 text-teal-800",
+  "Dictionaries": "bg-green-100 text-green-800",
+  "Git": "bg-orange-100 text-orange-800",
+  "Debugging": "bg-red-100 text-red-800",
+  "OOP": "bg-pink-100 text-pink-800",
+  "Recursion & Algorithms": "bg-yellow-100 text-yellow-800",
+  "Functions & Modules": "bg-lime-100 text-lime-800",
+  "File I/O": "bg-sky-100 text-sky-800",
+  "System Applications": "bg-indigo-100 text-indigo-800",
+  "Databases": "bg-amber-100 text-amber-800",
+  "Classes & Objects": "bg-rose-100 text-rose-800",
+  "Open Source Licenses": "bg-gray-100 text-gray-800",
+};
+
+function Quiz() {
+  const [topicSelection, setTopicSelection] = useState("All");
+  const [shuffle, setShuffle] = useState(false);
+  const [started, setStarted] = useState(false);
+  const [activeQs, setActiveQs] = useState([]);
+  
+  const [current, setCurrent] = useState(0);
+  const [tempSelection, setTempSelection] = useState(null);
+  const [answers, setAnswers] = useState({});
+  const [showHintMap, setShowHintMap] = useState({});
+  
+  const [finished, setFinished] = useState(false);
+  const [reviewMode, setReviewMode] = useState(false);
+  const [reviewIndex, setReviewIndex] = useState(0);
+
+  const topics = ["All", ...Array.from(new Set(questions.map(q => q.topic)))];
+
+  // Sync temp selection when navigating back/forward
+  const q = activeQs[current];
+  const qAnswered = q && answers[q.id];
+
+  const handleStart = () => {
+    let filtered = topicSelection === "All" ? [...questions] : questions.filter(q => q.topic === topicSelection);
+    if (shuffle) {
+      filtered = [...filtered].sort(() => Math.random() - 0.5);
+    }
+    setActiveQs(filtered);
+    setAnswers({});
+    setShowHintMap({});
+    setCurrent(0);
+    setTempSelection(null);
+    setStarted(true);
+    setFinished(false);
+    setReviewMode(false);
+  };
+
+  const restart = () => {
+    setStarted(false);
+  };
+
+  const handleSelect = (i) => {
+    if (!qAnswered) setTempSelection(i);
+  };
+
+  const handleConfirm = () => {
+    if (tempSelection === null) return;
+    setAnswers(prev => ({
+      ...prev,
+      [q.id]: { selected: tempSelection, correct: tempSelection === q.ans }
+    }));
+  };
+
+  const handleNext = () => {
+    if (current + 1 >= activeQs.length) {
+      setFinished(true);
+    } else {
+      setCurrent(c => c + 1);
+      setTempSelection(answers[activeQs[current+1].id]?.selected ?? null);
+    }
+  };
+
+  const handlePrev = () => {
+    if (current > 0) {
+      setCurrent(c => c - 1);
+      setTempSelection(answers[activeQs[current-1].id]?.selected ?? null);
+    }
+  };
+
+  const toggleHint = () => {
+    setShowHintMap(prev => ({ ...prev, [q.id]: !prev[q.id] }));
+  };
+
+  if (!started) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 flex flex-col items-center justify-center">
+        <div className="w-full max-w-xl bg-white rounded-2xl shadow-lg p-8">
+          <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">COMP2152</h2>
+          <p className="text-center text-gray-500 mb-8">Python & Tools Study Quiz</p>
+          
+          <div className="mb-6">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Select Study Topic:</label>
+            <select 
+              value={topicSelection} 
+              onChange={e => setTopicSelection(e.target.value)}
+              className="w-full border-2 border-gray-200 rounded-xl p-3 bg-gray-50 text-gray-800 font-medium focus:border-blue-500 focus:outline-none transition-colors"
+            >
+              {topics.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+
+          <div className="mb-8 flex items-center bg-gray-50 p-4 rounded-xl border border-gray-100">
+            <input 
+              type="checkbox" 
+              id="shuffle" 
+              checked={shuffle} 
+              onChange={e => setShuffle(e.target.checked)}
+              className="w-5 h-5 text-blue-600 rounded border-gray-300 mr-3"
+            />
+            <label htmlFor="shuffle" className="text-sm font-semibold text-gray-700 cursor-pointer select-none">
+              Mix up (shuffle) questions
+            </label>
+          </div>
+
+          <button onClick={handleStart} className="w-full py-4 rounded-xl bg-blue-600 text-white font-bold text-lg shadow-md hover:bg-blue-700 transition-colors active:scale-95">
+            Start Quiz
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const score = Object.values(answers).filter(a => a.correct).length;
+
+  if (reviewMode) {
+    const revQ = activeQs[reviewIndex];
+    const rAns = answers[revQ.id];
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 flex flex-col items-center">
+        <div className="w-full max-w-2xl bg-white rounded-2xl shadow-md p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-bold text-gray-700">Review Mode</h2>
+            <button onClick={() => setReviewMode(false)} className="text-sm text-blue-600 underline">← Back to results</button>
+          </div>
+          <div className="text-xs font-semibold mb-2">
+            <span className={`px-2 py-1 rounded-full ${TOPIC_COLORS[revQ.topic] || "bg-gray-100 text-gray-700"}`}>{revQ.topic}</span>
+          </div>
+          <p className="font-semibold text-gray-800 mb-4">Q{reviewIndex+1}. {revQ.q}</p>
+          <div className="space-y-2 mb-4">
+            {revQ.opts.map((o, i) => {
+              let cls = "border rounded-xl px-4 py-2 text-sm ";
+              if (i === revQ.ans) cls += "bg-green-100 border-green-400 text-green-800 font-semibold";
+              else if (rAns && i === rAns.selected && !rAns.correct) cls += "bg-red-100 border-red-400 text-red-800";
+              else cls += "border-gray-200 text-gray-600";
+              return <div key={i} className={cls}>{o}</div>;
+            })}
+          </div>
+          <div className={`text-sm font-semibold mb-4 ${rAns?.correct ? "text-green-700" : "text-red-700"}`}>
+            {rAns?.correct ? "✅ Correct!" : `❌ Incorrect — Correct answer: "${revQ.opts[revQ.ans]}"`}
+          </div>
+          <div className="flex justify-between">
+            <button disabled={reviewIndex===0} onClick={() => setReviewIndex(i => i-1)} className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 disabled:opacity-30 text-sm">← Prev</button>
+            <span className="text-xs text-gray-400 self-center">{reviewIndex+1} / {activeQs.length}</span>
+            <button disabled={reviewIndex===activeQs.length-1} onClick={() => setReviewIndex(i => i+1)} className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 disabled:opacity-30 text-sm">Next →</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (finished) {
+    const pct = Math.round((score / activeQs.length) * 100);
+    const topicStats = {};
+    activeQs.forEach(q => {
+      if (!topicStats[q.topic]) topicStats[q.topic] = { correct: 0, total: 0 };
+      topicStats[q.topic].total++;
+      if (answers[q.id]?.correct) topicStats[q.topic].correct++;
+    });
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 flex flex-col items-center">
+        <div className="w-full max-w-2xl bg-white rounded-2xl shadow-md p-6">
+          <h2 className="text-2xl font-bold text-center text-gray-800 mb-1">Quiz Complete! 🎉</h2>
+          <p className="text-center text-gray-500 mb-4 text-sm">COMP2152 Python & Tools Study Quiz</p>
+          <div className="text-center mb-4">
+            <span className="text-5xl font-bold" style={{color: pct>=80?"#16a34a":pct>=60?"#d97706":"#dc2626"}}>{pct}%</span>
+            <p className="text-gray-600 mt-1">{score} / {activeQs.length} correct</p>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-3 mb-6">
+            <div className="h-3 rounded-full" style={{width:`${pct}%`, background: pct>=80?"#16a34a":pct>=60?"#d97706":"#dc2626"}}></div>
+          </div>
+          <h3 className="font-semibold text-gray-700 mb-2">Performance by Topic</h3>
+          <div className="space-y-2 mb-6">
+            {Object.entries(topicStats).map(([t, s]) => {
+              const tp = Math.round((s.correct/s.total)*100);
+              return (
+                <div key={t} className="flex items-center gap-2">
+                  <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${TOPIC_COLORS[t]||"bg-gray-100 text-gray-700"}`}>{t}</span>
+                  <div className="flex-1 bg-gray-100 rounded-full h-2">
+                    <div className="h-2 rounded-full" style={{width:`${tp}%`, background:tp>=80?"#16a34a":tp>=60?"#d97706":"#dc2626"}}></div>
+                  </div>
+                  <span className="text-xs text-gray-500 shrink-0">{s.correct}/{s.total}</span>
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex gap-3">
+            <button onClick={() => { setReviewMode(true); setReviewIndex(0); }} className="flex-1 py-2 rounded-xl border-2 border-blue-500 text-blue-600 font-semibold text-sm">Review Answers</button>
+            <button onClick={restart} className="flex-1 py-2 rounded-xl bg-blue-600 text-white font-semibold text-sm">Start New Quiz</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const ansCount = Object.keys(answers).length;
+  const isSelected = tempSelection !== null;
+  const showHint = showHintMap[q.id];
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-4 flex flex-col items-center">
+      <div className="w-full max-w-2xl">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-4">
+          <button onClick={restart} className="text-sm font-semibold text-gray-500 hover:text-gray-800">← Back to Menu</button>
+        </div>
+        <div className="mb-4">
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-xs text-gray-500 font-medium">{topicSelection} Quiz</span>
+            <span className="text-xs text-gray-500">{current+1} / {activeQs.length}</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="h-2 rounded-full bg-blue-500 transition-all" style={{width:`${((current)/activeQs.length)*100}%`}}></div>
+          </div>
+          <div className="flex justify-between mt-1">
+            <span className="text-xs text-green-600 font-medium">✓ {Object.values(answers).filter(a=>a.correct).length} correct</span>
+            <span className="text-xs text-red-500 font-medium">✗ {Object.values(answers).filter(a=>!a.correct).length} wrong</span>
+          </div>
+        </div>
+
+        {/* Card */}
+        <div className="bg-white rounded-2xl shadow-md p-6 relative">
+          <div className="mb-3 flex justify-between items-center">
+            <span className={`text-xs font-semibold px-2 py-1 rounded-full ${TOPIC_COLORS[q.topic]||"bg-gray-100 text-gray-700"}`}>{q.topic}</span>
+            {qAnswered && <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded-md">Answered</span>}
+          </div>
+          <p className="text-gray-800 font-semibold text-base mb-5">{q.q}</p>
+
+          <div className="space-y-2 mb-5">
+            {q.opts.map((o, i) => {
+              let cls = "w-full text-left border-2 rounded-xl px-4 py-3 text-sm transition-all ";
+              if (!qAnswered) {
+                cls += tempSelection === i
+                  ? "border-blue-500 bg-blue-50 text-blue-800 font-medium shadow-sm"
+                  : "border-gray-200 hover:border-blue-300 hover:bg-gray-50 text-gray-700 cursor-pointer";
+              } else {
+                if (i === q.ans) cls += "border-green-500 bg-green-50 text-green-800 font-semibold";
+                else if (i === qAnswered.selected && qAnswered.selected !== q.ans) cls += "border-red-400 bg-red-50 text-red-700";
+                else cls += "border-gray-100 text-gray-400";
+              }
+              return (
+                <button key={i} className={cls} onClick={() => handleSelect(i)}>
+                  <span className="font-bold mr-2">{["A","B","C","D"][i]}.</span>{o}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Hint */}
+          {!qAnswered && (
+            <button onClick={toggleHint} className="text-xs text-amber-600 underline mb-3 font-medium">
+              {showHint ? "Hide hint" : "💡 Show hint"}
+            </button>
+          )}
+          {showHint && !qAnswered && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 text-sm text-amber-800 mb-3">{q.hint}</div>
+          )}
+
+          {/* Feedback */}
+          {qAnswered && (
+            <div className={`rounded-lg px-4 py-3 text-sm font-semibold mb-4 ${tempSelection===q.ans?"bg-green-50 text-green-700 border border-green-200":"bg-red-50 text-red-700 border border-red-200"}`}>
+              {tempSelection===q.ans ? "✅ Correct!" : `❌ Incorrect. The answer is: "${q.opts[q.ans]}"`}
+              <div className="text-xs font-normal mt-1 opacity-80">{q.hint}</div>
+            </div>
+          )}
+
+          {/* Buttons: Prev, Confirm, Next */}
+          <div className="flex gap-3 mt-4">
+            <button 
+              onClick={handlePrev} 
+              disabled={current === 0} 
+              className="px-4 py-2.5 rounded-xl bg-gray-100 text-gray-600 font-semibold disabled:opacity-30 disabled:invisible text-sm hover:bg-gray-200 transition-colors"
+            >
+              ← Prev
+            </button>
+            
+            {!qAnswered ? (
+              <button onClick={handleConfirm} disabled={!isSelected} className="flex-1 py-2.5 rounded-xl bg-blue-600 text-white font-semibold disabled:opacity-50 text-sm hover:bg-blue-700 transition-colors shadow-sm">
+                Confirm Answer
+              </button>
+            ) : (
+              <button onClick={handleNext} className="flex-1 py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm">
+                {current+1 >= activeQs.length ? "See Results 🎉" : "Next Question →"}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<Quiz />);
+    </script>
+</body>
+</html>
