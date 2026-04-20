@@ -136,7 +136,7 @@ const TOPIC_COLORS = {
 };
 
 function Quiz() {
-  const [topicSelection, setTopicSelection] = useState("All");
+  const [topicSelection, setTopicSelection] = useState([]);
   const [shuffle, setShuffle] = useState(false);
   const [started, setStarted] = useState(false);
   const [activeQs, setActiveQs] = useState([]);
@@ -157,7 +157,7 @@ function Quiz() {
   const qAnswered = q && answers[q.id];
 
   const handleStart = () => {
-    let filtered = topicSelection === "All" ? [...questions] : questions.filter(q => q.topic === topicSelection);
+    let filtered = topicSelection.length === 0 ? [...questions] : questions.filter(q => topicSelection.includes(q.topic));
     if (shuffle) {
       filtered = [...filtered].sort(() => Math.random() - 0.5);
     }
@@ -210,19 +210,28 @@ function Quiz() {
   if (!started) {
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex flex-col items-center justify-center">
-        <div className="w-full max-w-xl bg-white rounded-2xl shadow-lg p-8">
+        <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg p-5 sm:p-8">
           <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">COMP2152</h2>
           <p className="text-center text-gray-500 mb-8">Python & Tools Study Quiz</p>
           
           <div className="mb-6">
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Select Study Topic:</label>
-            <select 
-              value={topicSelection} 
-              onChange={e => setTopicSelection(e.target.value)}
-              className="w-full border-2 border-gray-200 rounded-xl p-3 bg-gray-50 text-gray-800 font-medium focus:border-blue-500 focus:outline-none transition-colors"
-            >
-              {topics.map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
+            <label className="block text-base font-semibold text-gray-700 mb-3">Select Study Topics (leave empty for All):</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-3 border-2 border-gray-100 rounded-xl bg-gray-50">
+              {topics.filter(t => t !== "All").map(t => (
+                <label key={t} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-200 cursor-pointer transition-colors border border-transparent hover:border-gray-300">
+                  <input 
+                    type="checkbox" 
+                    checked={topicSelection.includes(t)}
+                    onChange={(e) => {
+                      if (e.target.checked) setTopicSelection([...topicSelection, t]);
+                      else setTopicSelection(topicSelection.filter(x => x !== t));
+                    }}
+                    className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">{t}</span>
+                </label>
+              ))}
+            </div>
           </div>
 
           <div className="mb-8 flex items-center bg-gray-50 p-4 rounded-xl border border-gray-100">
@@ -341,8 +350,8 @@ function Quiz() {
         </div>
         <div className="mb-4">
           <div className="flex justify-between items-center mb-1">
-            <span className="text-xs text-gray-500 font-medium">{topicSelection} Quiz</span>
-            <span className="text-xs text-gray-500">{current+1} / {activeQs.length}</span>
+            <span className="text-sm text-gray-500 font-medium">{topicSelection.length === 0 ? "All Topics" : topicSelection.length === 1 ? topicSelection[0] : "Mixed Topics"} Quiz</span>
+            <span className="text-sm text-gray-500 font-bold">{current+1} / {activeQs.length}</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div className="h-2 rounded-full bg-blue-500 transition-all" style={{width:`${((current)/activeQs.length)*100}%`}}></div>
@@ -359,11 +368,11 @@ function Quiz() {
             <span className={`text-xs font-semibold px-2 py-1 rounded-full ${TOPIC_COLORS[q.topic]||"bg-gray-100 text-gray-700"}`}>{q.topic}</span>
             {qAnswered && <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded-md">Answered</span>}
           </div>
-          <p className="text-gray-800 font-semibold text-base mb-5">{q.q}</p>
+          <p className="text-gray-800 font-bold text-lg mb-5 leading-relaxed">{q.q}</p>
 
-          <div className="space-y-2 mb-5">
+          <div className="space-y-3 mb-5">
             {q.opts.map((o, i) => {
-              let cls = "w-full text-left border-2 rounded-xl px-4 py-3 text-sm transition-all ";
+              let cls = "w-full text-left border-2 rounded-xl px-4 py-3 text-base transition-all ";
               if (!qAnswered) {
                 cls += tempSelection === i
                   ? "border-blue-500 bg-blue-50 text-blue-800 font-medium shadow-sm"
@@ -404,17 +413,17 @@ function Quiz() {
             <button 
               onClick={handlePrev} 
               disabled={current === 0} 
-              className="px-4 py-2.5 rounded-xl bg-gray-100 text-gray-600 font-semibold disabled:opacity-30 disabled:invisible text-sm hover:bg-gray-200 transition-colors"
+              className="px-5 py-3 rounded-xl bg-gray-100 text-gray-700 font-semibold disabled:opacity-30 disabled:invisible text-base hover:bg-gray-200 transition-colors"
             >
               ← Prev
             </button>
             
             {!qAnswered ? (
-              <button onClick={handleConfirm} disabled={!isSelected} className="flex-1 py-2.5 rounded-xl bg-blue-600 text-white font-semibold disabled:opacity-50 text-sm hover:bg-blue-700 transition-colors shadow-sm">
+              <button onClick={handleConfirm} disabled={!isSelected} className="flex-1 py-3 rounded-xl bg-blue-600 text-white font-bold disabled:opacity-50 text-base hover:bg-blue-700 transition-colors shadow-sm">
                 Confirm Answer
               </button>
             ) : (
-              <button onClick={handleNext} className="flex-1 py-2.5 rounded-xl bg-blue-600 text-white font-semibold text-sm hover:bg-blue-700 transition-colors shadow-sm">
+              <button onClick={handleNext} className="flex-1 py-3 rounded-xl bg-blue-600 text-white font-bold text-base hover:bg-blue-700 transition-colors shadow-sm">
                 {current+1 >= activeQs.length ? "See Results 🎉" : "Next Question →"}
               </button>
             )}
