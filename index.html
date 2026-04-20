@@ -18,6 +18,13 @@
         }
       }
     </script>
+    <style>
+      /* Dynamically scale the root font size based on screen width to prevent the UI from looking tiny on high-res displays */
+      @media (min-width: 768px) { html { font-size: 18px; } }
+      @media (min-width: 1024px) { html { font-size: 22px; } }
+      @media (min-width: 1536px) { html { font-size: 28px; } }
+      @media (min-width: 2560px) { html { font-size: 36px; } }
+    </style>
 </head>
 <body class="bg-gray-50">
     <div id="root"></div>
@@ -210,9 +217,9 @@ function Quiz() {
   if (!started) {
     return (
       <div className="min-h-screen bg-gray-50 p-4 flex flex-col items-center justify-center">
-        <div className="w-full max-w-2xl bg-white rounded-2xl shadow-lg p-5 sm:p-8">
-          <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">COMP2152</h2>
-          <p className="text-center text-gray-500 mb-8">Python & Tools Study Quiz</p>
+        <div className="w-full max-w-4xl bg-white rounded-3xl shadow-lg p-6 sm:p-10">
+          <h2 className="text-5xl font-bold text-gray-800 mb-4 text-center">COMP2152</h2>
+          <p className="text-center text-xl text-gray-500 mb-10">Python & Tools Study Quiz</p>
           
           <div className="mb-6">
             <label className="block text-base font-semibold text-gray-700 mb-3">Select Study Topics (leave empty for All):</label>
@@ -343,7 +350,7 @@ function Quiz() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 flex flex-col items-center">
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-4xl mt-6">
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <button onClick={restart} className="text-sm font-semibold text-gray-500 hover:text-gray-800">← Back to Menu</button>
